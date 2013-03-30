@@ -25,6 +25,7 @@ gpg_home = File.join(user_home, node['gpg']['homedir'])
 
 directory gpg_home do
   owner node['gpg']['user']
+  mode 00700
   action :nothing
 end.run_action(:create)
 
