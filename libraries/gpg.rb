@@ -15,7 +15,17 @@ def gpg_encrypt(data, recipients)
   # Chef always uses root's GPG keyring.
   GPGME::Engine.home_dir='/root/.gnupg'
 
-  crypto = GPGME::Crypto.new :armor => true
-  data = crypto.encrypt(data, :recipients => recipients)
-  data.read
+  if GPGME::Key.find(:public, recipients).empty?
+    raise RuntimeError.new("gpg_encrypt couldn't find public keys for recipients: " + recipients)
+  end
+
+  begin
+    crypto = GPGME::Crypto.new :armor => true
+    data = crypto.encrypt(data, :recipients => recipients)
+    data.read
+  rescue
+    Chef::Log.error "gpg_encrypt failed encrypting for recipients: " + recipients
+    raise
+  end
+
 end
